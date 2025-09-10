@@ -50,7 +50,7 @@ function Login() {
 
                 </div>
                 <button type='submit' className ='btn btn-success w-100' >Log in</button>
-                <p>You are agree to our terms and polices</p>
+               
                 <Link to='/Signup' className ='btn btn-default border w-100 bg-light text-decoration-none' >Create Account</Link>
             </form>  
         </div>
