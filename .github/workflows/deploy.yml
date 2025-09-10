@@ -31,7 +31,7 @@ jobs:
           host: ${{ secrets.HOST_DNS }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "frontend/build/*"
+          source: "build/*"
           target: "/var/www/html/"
 
       # Restart nginx to load new files
