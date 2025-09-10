@@ -19,13 +19,23 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run:  npm install
+        run: npm install
 
       - name: Build project
-        run:  npm run build
+        run: npm run build
 
-      # Copy build output to EC2
-      - name: Clean old files on EC2
+      # Copy build folder to EC2 (temporary location)
+      - name: Copy build folder to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "build"
+          target: "/home/ubuntu/tmp_build"
+
+      # Move contents into NGINX root
+      - name: Deploy to NGINX root
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.HOST_DNS }}
@@ -33,23 +43,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             sudo rm -rf /var/www/html/*
-
-      - name: Copy build to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST_DNS }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "build/*"
-          target: "/var/www/html"
-
-
-      # Restart nginx to load new files
-      - name: Restart NGINX
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST_DNS }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
+            sudo mv /home/ubuntu/tmp_build/build/* /var/www/html/
+            sudo rm -rf /home/ubuntu/tmp_build
             sudo systemctl restart nginx
